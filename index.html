@@ -3,174 +3,374 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GiveMaster Premium</title>
-    <!-- Подключаем Telegram Web App SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <title>Razey App</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+        :root {
+            --bg-color: #08080c;
+            --card-bg: #14141c;
+            --primary: #BF40BF;
+            --primary-glow: rgba(191, 64, 191, 0.4);
+            --gold: #FFD700;
+            --text-main: #ffffff;
+            --text-sec: #8e8e93;
+            --success: #32d74b; 
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 90px;
             -webkit-tap-highlight-color: transparent;
-            background-color: #F8FAFC;
+            overflow-x: hidden;
+            user-select: none;
         }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .glass-nav {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(255, 255, 255, 0.5);
+
+        /* АНИМАЦИИ */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ОБЩИЕ ЭЛЕМЕНТЫ */
+        .page-header { text-align: center; padding: 25px 0; font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .page-header-icon { color: var(--primary); font-size: 24px; }
+
+        /* ГЛАВНАЯ */
+        .stories-bar { display: flex; gap: 10px; padding: 15px; overflow-x: auto; scrollbar-width: none; }
+        .story-card { min-width: 100px; height: 60px; background: var(--card-bg); border-radius: 12px; padding: 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .story-badge { position: absolute; top: -5px; right: -5px; background: var(--success); color: #000; font-weight: bold; padding: 2px 6px; border-radius: 8px; font-size: 9px; }
+        
+        .header-section { text-align: center; padding: 20px; }
+        .logo-big { font-size: 42px; font-weight: 900; letter-spacing: -1px; margin-bottom: 5px; text-shadow: 0 0 20px var(--primary-glow); }
+        .logo-big span { color: var(--primary); }
+        .sub-text { color: var(--text-sec); font-size: 14px; margin-bottom: 25px; }
+
+        .balance-card { background: var(--card-bg); margin: 0 15px; padding: 15px 20px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(191, 64, 191, 0.2); }
+        .balance-info { display: flex; flex-direction: column; }
+        .balance-label { font-size: 12px; color: var(--text-sec); }
+        .balance-amount { font-size: 24px; font-weight: bold; margin-top: 2px; }
+        .deposit-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 14px; box-shadow: 0 4px 15px var(--primary-glow); cursor: pointer; }
+        .deposit-btn:active { transform: scale(0.95); }
+
+        .section-title { padding: 25px 15px 10px; font-size: 18px; font-weight: bold; }
+        .task-list { padding: 0 15px; display: flex; flex-direction: column; gap: 10px; }
+        .task-item { background: var(--card-bg); padding: 15px; border-radius: 14px; display: flex; align-items: center; gap: 15px; }
+        .task-icon { width: 40px; height: 40px; background: rgba(191,64,191,0.15); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary); }
+        .task-content { flex: 1; }
+        .task-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+        .task-reward { font-size: 12px; color: var(--success); }
+
+        /* ИГРЫ */
+        .games-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px; }
+        .game-card { background: var(--card-bg); border: 1px solid rgba(191, 64, 191, 0.3); border-radius: 16px; height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; transition: transform 0.2s; cursor: pointer; }
+        .game-card:active { transform: scale(0.98); }
+        .game-icon-circle { width: 60px; height: 60px; background: rgba(0,0,0,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; border: 1px solid var(--primary); box-shadow: 0 0 15px rgba(191,64,191,0.2); color: var(--primary); }
+        .game-title { font-weight: 600; font-size: 15px; }
+        .game-card.disabled { opacity: 0.5; border-color: rgba(255,255,255,0.05); background: #0f0f14; pointer-events: none; }
+        .soon-badge { background: #333; color: #888; font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: bold; }
+
+        /* ИНВЕНТАРЬ */
+        .inventory-list { padding-bottom: 20px; }
+        .item-card { background: var(--card-bg); margin: 0 15px 15px; border-radius: 16px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); animation: fadeIn 0.5s ease; }
+        .item-header { display: flex; gap: 15px; margin-bottom: 20px; }
+        .item-img-box { width: 70px; height: 70px; background: radial-gradient(circle, rgba(191,64,191,0.2) 0%, transparent 70%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 35px; }
+        .item-info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .item-name { font-weight: bold; font-size: 15px; margin-bottom: 5px; line-height: 1.3; }
+        .item-status { font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 5px; font-weight: 500; margin-bottom: 5px; }
+        .item-price { font-weight: bold; color: var(--primary); font-size: 16px; }
+        .item-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-action { padding: 12px; border-radius: 10px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; }
+        .btn-sell { background: rgba(191, 64, 191, 0.15); color: var(--primary); border: 1px solid var(--primary); }
+        .btn-steam { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
+        .empty-msg { text-align: center; color: var(--text-sec); padding: 40px; }
+
+        /* ЭКРАН РУЛЕТКИ (МОДАЛКА) */
+        #roulette-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #08080c; z-index: 2000; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
         }
-        .glass-header {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+        #roulette-modal.active { display: flex; animation: fadeIn 0.3s ease; }
+        
+        .roulette-wrapper {
+            position: relative; width: 100%; height: 140px; background: #111;
+            border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary);
+            overflow: hidden; margin-bottom: 30px;
         }
-        .tap-effect:active { transform: scale(0.96); transition: transform 0.1s; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .roulette-track { display: flex; height: 100%; position: absolute; left: 0; }
+        .roulette-item {
+            min-width: 120px; height: 100%; border-right: 1px solid #333;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #1a1a1a;
         }
-        .gradient-primary { background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); }
-        .gradient-card { background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.85) 100%); }
+        .roulette-marker {
+            position: absolute; left: 50%; top: 0; width: 4px; height: 100%;
+            background: var(--gold); box-shadow: 0 0 20px var(--gold);
+            transform: translateX(-50%); z-index: 10;
+        }
+        .spin-btn {
+            background: var(--primary); color: white; border: none; padding: 20px 60px;
+            font-size: 20px; font-weight: bold; border-radius: 15px;
+            box-shadow: 0 0 30px var(--primary-glow); cursor: pointer;
+        }
+        .spin-btn:disabled { background: #444; box-shadow: none; }
+        .close-roulette {
+            position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer;
+        }
+
+        /* ПРОФИЛЬ */
+        .profile-header { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
+        .avatar-container { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--primary), #222); padding: 3px; margin-bottom: 15px; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; font-size: 30px; }
+        .user-name { font-size: 20px; font-weight: bold; }
+        .settings-group { padding: 0 15px; margin-bottom: 20px; }
+        .setting-item { background: var(--card-bg); padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .setting-item:first-child { border-top-left-radius: 14px; border-top-right-radius: 14px; }
+        .setting-item:last-child { border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; border-bottom: none; }
+
+        /* МЕНЮ */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
+            background: rgba(20, 20, 28, 0.95); backdrop-filter: blur(10px);
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; z-index: 1000;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-sec); font-size: 10px; text-decoration: none; width: 60px; transition: 0.2s; cursor: pointer; }
+        .nav-item.active { color: var(--primary); transform: scale(1.1); }
+        .nav-icon { font-size: 22px; }
+
     </style>
 </head>
-<body class="text-slate-800 h-screen flex flex-col overflow-hidden selection:bg-indigo-100">
+<body>
 
-    <!-- HEADER -->
-    <div id="header-section" class="glass-header z-20 pt-4 sticky top-0 border-b border-slate-100/50">
-        <div class="px-5 py-4 flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900">
-                    Give<span class="text-indigo-600">Master</span>
-                </h1>
-                <p class="text-xs text-slate-400 font-medium">Агрегатор честных розыгрышей</p>
-            </div>
-            <div class="bg-indigo-50 border border-indigo-100 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-                <i class="fas fa-ticket-alt text-indigo-600 text-xs"></i>
-                <span class="text-indigo-900 font-bold text-sm">Гость</span>
-            </div>
+    <div id="tab-home" class="tab-content active">
+        <div class="stories-bar">
+            <div class="story-card"><div class="story-badge">+47%</div><span style="font-size: 16px;">🔫</span><span>Апгрейдер</span></div>
+            <div class="story-card"><div class="story-badge" style="background:#ff3b30;color:white;">-10%</div><span style="font-size: 16px;">📦</span><span>Кейс</span></div>
+            <div class="story-card"><span style="font-size: 16px;">👤</span><span>Победитель</span></div>
         </div>
-        
-        <!-- Категории -->
-        <div class="flex space-x-2 overflow-x-auto hide-scroll px-5 pb-4">
-            <button onclick="filterCategory('all')" class="cat-btn tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-indigo-500/20 text-white gradient-primary whitespace-nowrap transition-all border border-transparent">
-                <i class="fas fa-th-large"></i> Все
-            </button>
-            <button onclick="filterCategory('crypto')" class="cat-btn tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-500 border border-slate-200 whitespace-nowrap transition-all hover:bg-slate-50">
-                <i class="fab fa-bitcoin text-amber-500"></i> Крипта
-            </button>
-            <button onclick="filterCategory('tech')" class="cat-btn tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-500 border border-slate-200 whitespace-nowrap transition-all hover:bg-slate-50">
-                <i class="fas fa-mobile-alt text-blue-500"></i> Гаджеты
-            </button>
-             <button onclick="filterCategory('money')" class="cat-btn tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-500 border border-slate-200 whitespace-nowrap transition-all hover:bg-slate-50">
-                <i class="fas fa-sack-dollar text-green-500"></i> Деньги
-            </button>
+        <div class="header-section">
+            <div class="logo-big">RA<span>ZEY</span></div>
+            <div class="sub-text">Твоя доза адреналина.</div>
+        </div>
+        <div class="balance-card">
+            <div class="balance-info"><span class="balance-label">Баланс</span><span class="balance-amount" id="main-balance">...</span></div>
+            <button class="deposit-btn" onclick="addBalance()">Пополнить</button>
+        </div>
+        <div class="section-title">ТОП задания</div>
+        <div class="task-list">
+            <div class="task-item">
+                <div class="task-icon">👥</div>
+                <div class="task-content"><div class="task-title">Пригласить друга</div><div class="task-reward">+1000 💎 Без ограничений</div></div>
+            </div>
         </div>
     </div>
 
-    <!-- CONTENT -->
-    <div id="main-content" class="flex-1 overflow-y-auto px-5 pt-4 pb-32 hide-scroll bg-slate-50">
-        <!-- Рекомендуемое -->
-        <div class="mb-8 fade-in">
-            <div class="flex justify-between items-end mb-4">
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <span class="w-1.5 h-6 bg-indigo-600 rounded-full"></span>
-                    Горящие предложения
-                </h2>
-                <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md">TOP</span>
+    <div id="tab-games" class="tab-content">
+        <div class="page-header"><span class="page-header-icon">🎮</span> Игры</div>
+        <div class="games-grid">
+            <div class="game-card" onclick="openRoulette()">
+                <div class="game-icon-circle">📦</div>
+                <div class="game-title">Кейсы</div>
             </div>
-            <div class="flex space-x-4 overflow-x-auto hide-scroll pb-4 -mx-5 px-5">
-                <div class="min-w-[280px] h-[170px] rounded-3xl relative overflow-hidden shadow-xl shadow-slate-200 tap-effect group" onclick="Telegram.WebApp.showAlert('Это демо-конкурс!')">
-                    <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?q=80&w=800&auto=format&fit=crop" class="absolute w-full h-full object-cover">
-                    <div class="absolute inset-0 gradient-card flex flex-col justify-end p-5">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-white/20 backdrop-blur-md border border-white/30 text-white text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">Tech</span>
-                            <div class="bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1 animate-pulse">
-                                <i class="fas fa-fire"></i> 1ч 20м
-                            </div>
-                        </div>
-                        <h3 class="text-white font-bold text-lg leading-tight mb-1">MacBook Pro M3</h3>
-                        <p class="text-slate-300 text-xs font-medium">От канала "Apple Insider"</p>
-                    </div>
-                </div>
+            <div class="game-card">
+                <div class="game-icon-circle">📈</div>
+                <div class="game-title">Апгрейдер</div>
             </div>
-        </div>
-
-        <!-- Лента -->
-        <div class="flex items-center justify-between mb-4">
-             <h2 class="text-lg font-bold text-slate-800">Все активные</h2>
-        </div>
-        <div id="contest-grid" class="grid grid-cols-1 gap-4"></div>
-        <div class="mt-8 text-center pb-6">
-            <p class="text-slate-400 text-xs">Больше конкурсов загружается...</p>
+            <div class="game-card">
+                <div class="game-icon-circle">📄</div>
+                <div class="game-title">Контракты</div>
+            </div>
+            <div class="game-card disabled">
+                <div class="game-icon-circle">⚔️</div>
+                <div class="game-title">Battles</div>
+                <div class="soon-badge">Скоро</div>
+            </div>
         </div>
     </div>
+
+    <div id="tab-inventory" class="tab-content">
+        <div class="page-header"><span class="page-header-icon">🎒</span> Инвентарь</div>
+        <div id="inventory-list" class="inventory-list">
+            <div class="empty-msg">Пусто... Открой кейс!</div>
+        </div>
+    </div>
+
+    <div id="tab-profile" class="tab-content">
+        <div class="profile-header">
+            <div class="avatar-container"><div class="avatar-img">😎</div></div>
+            <div class="user-name">Игрок</div>
+        </div>
+        <div class="settings-group">
+            <div class="setting-item">
+                <span class="setting-text">🌍 Язык</span><span>Русский ❯</span>
+            </div>
+            <div class="setting-item">
+                <span class="setting-text">🔗 Трейд-ссылка</span><span style="color:var(--primary)">Настроить ❯</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="roulette-modal">
+        <div class="close-roulette" onclick="closeRoulette()">×</div>
+        <h2 style="margin-bottom: 20px;">Кейс "Новичок"</h2>
+        <div class="roulette-wrapper">
+            <div class="roulette-marker"></div>
+            <div class="roulette-track" id="track"></div>
+        </div>
+        <div style="margin-bottom: 20px; color: #888;">Цена: <span style="color: var(--primary); font-weight: bold;">250 RZY</span></div>
+        <button class="spin-btn" id="spinBtn" onclick="spin()">ОТКРЫТЬ</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" data-tab="tab-home"><span class="nav-icon">🏠</span><span>Главная</span></div>
+        <div class="nav-item" data-tab="tab-games"><span class="nav-icon">🎮</span><span>Игры</span></div>
+        <div class="nav-item" data-tab="tab-inventory"><span class="nav-icon">🎒</span><span>Инвентарь</span></div>
+        <div class="nav-item" data-tab="tab-profile"><span class="nav-icon">👤</span><span>Профиль</span></div>
+    </nav>
 
     <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        // === ЛОГИКА ИГРЫ ===
+        
+        // 1. Состояние (Баланс и Инвентарь)
+        let balance = localStorage.getItem('rzy_balance') ? parseInt(localStorage.getItem('rzy_balance')) : 2000;
+        let inventory = localStorage.getItem('rzy_inventory') ? JSON.parse(localStorage.getItem('rzy_inventory')) : [];
 
-        // Данные (Мок)
-        const contests = [
-            { id: 1, title: "Премиум подписка Telegram 1 год", category: "tech", img: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=800&auto=format&fit=crop", participants: 1420, time: "23ч 10м", author: "TG Daily" },
-            { id: 2, title: "500 USDT на кошелек", category: "crypto", img: "https://images.unsplash.com/photo-1621504450168-b87d296fbc9d?q=80&w=800&auto=format&fit=crop", participants: 4500, time: "40м", author: "CryptoWhale" },
-            { id: 3, title: "10.000 Рублей на карту", category: "money", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=800&auto=format&fit=crop", participants: 89, time: "12ч 00м", author: "Rich Daddy" },
+        // Список возможных скинов
+        const skinsDB = [
+            { name: "AK-47 | Slate", price: 450, icon: "🔫", color: "#8844ff" },
+            { name: "AWP | Atheris", price: 800, icon: "🐉", color: "#eb4b4b" },
+            { name: "Glock-18 | Fade", price: 12000, icon: "🌈", color: "#ffd700" },
+            { name: "P250 | Sand Dune", price: 10, icon: "🥪", color: "#b0c3d9" },
+            { name: "M4A4 | Neo-Noir", price: 1500, icon: "🤖", color: "#eb4b4b" },
+            { name: "USP-S | Cortex", price: 600, icon: "🧠", color: "#d32ee6" }
         ];
 
-        const grid = document.getElementById('contest-grid');
+        // 2. Инициализация при запуске
+        updateUI();
 
-        function renderContests(filter = 'all') {
-            grid.innerHTML = '';
-            const filtered = filter === 'all' ? contests : contests.filter(c => c.category === filter);
+        function updateUI() {
+            // Обновляем текст баланса
+            document.getElementById('main-balance').innerText = balance.toLocaleString() + " RZY";
+            localStorage.setItem('rzy_balance', balance);
             
-            filtered.forEach(c => {
-                const card = document.createElement('div');
-                card.className = "bg-white rounded-2xl p-3 shadow-sm border border-slate-100 flex gap-4 tap-effect active:scale-[0.98] transition-all";
-                // В будущем здесь будет логика участия
-                card.onclick = () => tg.showPopup({
-                    title: c.title,
-                    message: `Хотите участвовать в розыгрыше от ${c.author}?`,
-                    buttons: [{type: "ok", text: "Участвовать"}, {type: "cancel", text: "Отмена"}]
+            // Рендерим инвентарь
+            const invList = document.getElementById('inventory-list');
+            if (inventory.length === 0) {
+                invList.innerHTML = '<div class="empty-msg">Пусто... Открой кейс!</div>';
+            } else {
+                invList.innerHTML = '';
+                inventory.slice().reverse().forEach(item => {
+                    invList.innerHTML += `
+                        <div class="item-card">
+                            <div class="item-header">
+                                <div class="item-img-box">${item.icon}</div>
+                                <div class="item-info">
+                                    <div class="item-name">${item.name}</div>
+                                    <div class="item-status">✅ Доступен</div>
+                                    <div class="item-price">💎 ${item.price} RZY</div>
+                                </div>
+                            </div>
+                            <div class="item-actions">
+                                <button class="btn-action btn-sell" onclick="sellItem('${item.id}')">$ Продать</button>
+                                <button class="btn-action btn-steam">🔗 В Steam</button>
+                            </div>
+                        </div>
+                    `;
                 });
-
-                card.innerHTML = `
-                    <div class="w-24 h-24 rounded-xl overflow-hidden shadow-inner flex-shrink-0 relative">
-                        <img src="${c.img}" class="w-full h-full object-cover">
-                    </div>
-                    <div class="flex flex-col flex-1 justify-between py-0.5">
-                        <div>
-                            <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-wide mb-0.5 block">${c.author}</span>
-                            <h3 class="text-sm font-bold text-slate-800 leading-snug line-clamp-2">${c.title}</h3>
-                        </div>
-                        <div class="flex items-center justify-between mt-2">
-                             <div class="flex items-center gap-1.5">
-                                <span class="text-[10px] text-slate-400 font-medium">+${c.participants} уч.</span>
-                             </div>
-                             <button class="bg-indigo-50 text-indigo-600 w-8 h-8 rounded-full flex items-center justify-center">
-                                <i class="fas fa-chevron-right text-xs"></i>
-                             </button>
-                        </div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
+            }
+            localStorage.setItem('rzy_inventory', JSON.stringify(inventory));
         }
 
-        function filterCategory(cat) {
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.className = "cat-btn tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-white text-slate-500 border border-slate-200 whitespace-nowrap transition-all hover:bg-slate-50";
-            });
-            event.currentTarget.className = "cat-btn tap-effect flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-indigo-500/20 text-white gradient-primary whitespace-nowrap transition-all border border-transparent";
-            renderContests(cat);
+        function addBalance() {
+            balance += 1000;
+            alert("Пополнено на 1000 RZY (Тест)");
+            updateUI();
         }
 
-        renderContests();
+        // 3. Рулетка
+        function openRoulette() {
+            document.getElementById('roulette-modal').classList.add('active');
+            generateTrack();
+        }
+
+        function closeRoulette() {
+            document.getElementById('roulette-modal').classList.remove('active');
+        }
+
+        function generateTrack() {
+            const track = document.getElementById('track');
+            track.innerHTML = '';
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0)';
+            
+            // Генерируем 50 случайных предметов для ленты
+            for (let i = 0; i < 50; i++) {
+                const skin = skinsDB[Math.floor(Math.random() * skinsDB.length)];
+                const div = document.createElement('div');
+                div.className = 'roulette-item';
+                div.innerHTML = `<div style="font-size:30px;">${skin.icon}</div><div style="font-size:10px; color:${skin.color}; margin-top:5px;">${skin.name}</div>`;
+                track.appendChild(div);
+            }
+        }
+
+        function spin() {
+            if (balance < 250) {
+                alert("Недостаточно средств!");
+                return;
+            }
+
+            balance -= 250;
+            updateUI();
+            
+            const btn = document.getElementById('spinBtn');
+            const track = document.getElementById('track');
+            btn.disabled = true;
+
+            // Выбираем победителя (случайно)
+            const winner = skinsDB[Math.floor(Math.random() * skinsDB.length)];
+            
+            // Анимация
+            track.style.transition = 'transform 4s cubic-bezier(0.1, 0, 0.2, 1)';
+            const cardWidth = 121; // 120px width + 1px border
+            // Останавливаемся где-то между 35 и 40 карточкой
+            const stopAt = (35 * cardWidth) + (Math.random() * 50); 
+            track.style.transform = `translateX(-${stopAt}px)`;
+
+            setTimeout(() => {
+                alert(`Вы выиграли: ${winner.name}!`);
+                // Добавляем в инвентарь
+                inventory.push({ ...winner, id: Date.now() }); // Уникальный ID
+                updateUI();
+                btn.disabled = false;
+                generateTrack(); // Сброс для следующего раза
+            }, 4200);
+        }
+
+        function sellItem(id) {
+            // Находим предмет
+            const itemIndex = inventory.findIndex(i => i.id == id);
+            if (itemIndex > -1) {
+                balance += inventory[itemIndex].price;
+                inventory.splice(itemIndex, 1);
+                updateUI();
+            }
+        }
+
+        // 4. Табы
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabs = document.querySelectorAll('.tab-content');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(nav => nav.classList.remove('active'));
+                tabs.forEach(tab => tab.classList.remove('active'));
+                item.classList.add('active');
+                const tabId = item.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
     </script>
 </body>
 </html>
