@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Razey App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --bg-color: #08080c;
@@ -35,14 +36,7 @@
 
         /* ОБЩИЕ ЭЛЕМЕНТЫ */
         .page-header { text-align: center; padding: 25px 0; font-size: 20px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        
-        /* Изображения скинов */
-        .skin-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 0 5px rgba(255,255,255,0.1));
-        }
+        .skin-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); }
 
         /* ГЛАВНАЯ */
         .stories-bar { display: flex; gap: 10px; padding: 15px; overflow-x: auto; scrollbar-width: none; }
@@ -93,63 +87,34 @@
         .btn-steam { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); }
         .empty-msg { text-align: center; color: var(--text-sec); padding: 40px; }
 
-        /* ЭКРАН РУЛЕТКИ (МОДАЛКА) */
-        #roulette-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #08080c; z-index: 2000; display: none;
-            flex-direction: column; align-items: center; justify-content: center;
-        }
+        /* РУЛЕТКА */
+        #roulette-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #08080c; z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; }
         #roulette-modal.active { display: flex; animation: fadeIn 0.3s ease; }
-        
-        .roulette-wrapper {
-            position: relative; width: 100%; height: 160px; background: #111;
-            border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary);
-            overflow: hidden; margin-bottom: 30px;
-        }
+        .roulette-wrapper { position: relative; width: 100%; height: 160px; background: #111; border-top: 2px solid var(--primary); border-bottom: 2px solid var(--primary); overflow: hidden; margin-bottom: 30px; }
         .roulette-track { display: flex; height: 100%; position: absolute; left: 0; }
-        .roulette-item {
-            min-width: 140px; height: 100%; border-right: 1px solid #333;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: #1a1a1a; padding: 10px; box-sizing: border-box;
-        }
+        .roulette-item { min-width: 140px; height: 100%; border-right: 1px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1a1a1a; padding: 10px; box-sizing: border-box; }
         .roulette-item img { width: 90%; height: auto; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5)); }
-        
-        .roulette-marker {
-            position: absolute; left: 50%; top: 0; width: 4px; height: 100%;
-            background: var(--gold); box-shadow: 0 0 20px var(--gold);
-            transform: translateX(-50%); z-index: 10;
-        }
-        .spin-btn {
-            background: var(--primary); color: white; border: none; padding: 20px 60px;
-            font-size: 20px; font-weight: bold; border-radius: 15px;
-            box-shadow: 0 0 30px var(--primary-glow); cursor: pointer;
-        }
+        .roulette-marker { position: absolute; left: 50%; top: 0; width: 4px; height: 100%; background: var(--gold); box-shadow: 0 0 20px var(--gold); transform: translateX(-50%); z-index: 10; }
+        .spin-btn { background: var(--primary); color: white; border: none; padding: 20px 60px; font-size: 20px; font-weight: bold; border-radius: 15px; box-shadow: 0 0 30px var(--primary-glow); cursor: pointer; }
         .spin-btn:disabled { background: #444; box-shadow: none; }
-        .close-roulette {
-            position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer;
-        }
+        .close-roulette { position: absolute; top: 20px; right: 20px; color: #fff; font-size: 30px; cursor: pointer; }
 
         /* ПРОФИЛЬ */
         .profile-header { display: flex; flex-direction: column; align-items: center; padding: 30px 20px; }
         .avatar-container { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, var(--primary), #222); padding: 3px; margin-bottom: 15px; }
-        .avatar-img { width: 100%; height: 100%; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; font-size: 30px; overflow: hidden; }
+        .avatar-img { width: 100%; height: 100%; border-radius: 50%; background: #111; display: flex; align-items: center; justify-content: center; font-size: 30px; overflow: hidden; background-size: cover; background-position: center; }
         .user-name { font-size: 20px; font-weight: bold; }
+        .user-id { font-size: 12px; color: var(--text-sec); margin-top: 5px; }
         .settings-group { padding: 0 15px; margin-bottom: 20px; }
         .setting-item { background: var(--card-bg); padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .setting-item:first-child { border-top-left-radius: 14px; border-top-right-radius: 14px; }
         .setting-item:last-child { border-bottom-left-radius: 14px; border-bottom-right-radius: 14px; border-bottom: none; }
 
         /* МЕНЮ */
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px;
-            background: rgba(20, 20, 28, 0.95); backdrop-filter: blur(10px);
-            display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; z-index: 1000;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: rgba(20, 20, 28, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-sec); font-size: 10px; text-decoration: none; width: 60px; transition: 0.2s; cursor: pointer; }
         .nav-item.active { color: var(--primary); transform: scale(1.1); }
         .nav-icon { font-size: 22px; }
-
     </style>
 </head>
 <body>
@@ -210,11 +175,10 @@
     <div id="tab-profile" class="tab-content">
         <div class="profile-header">
             <div class="avatar-container">
-                <div class="avatar-img">
-                    <img src="https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposbupIgthwczLZAJF7dC_mL-In-7xJ4Tdn2xZ_Ish0rDA9Nqm3wDk-0E5MW31LdKXJgQ9Z1rQ8lLskOzp0cO_vMnNmyQx63Yq4i7fnkDlgx9OaPsv26IuC_wD8w" class="skin-img" alt="Avatar">
-                </div>
+                <div class="avatar-img" id="user-avatar" style="background-image: url('https://cdn-icons-png.flaticon.com/512/847/847969.png');"></div>
             </div>
-            <div class="user-name">Игрок</div>
+            <div class="user-name" id="user-name">Гость</div>
+            <div class="user-id" id="user-id">ID: ---</div>
         </div>
         <div class="settings-group">
             <div class="setting-item">
@@ -245,55 +209,53 @@
     </nav>
 
     <script>
-        // === ЛОГИКА ИГРЫ ===
-        
-        let balance = localStorage.getItem('rzy_balance') ? parseInt(localStorage.getItem('rzy_balance')) : 2000;
+        // === ИНИЦИАЛИЗАЦИЯ ТЕЛЕГРАМ APP ===
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Развернуть на весь экран
+
+        // Баланс и Инвентарь
+        let balance = 0;
         let inventory = localStorage.getItem('rzy_inventory') ? JSON.parse(localStorage.getItem('rzy_inventory')) : [];
 
-        // БАЗА СКИНОВ (С РЕАЛЬНЫМИ ССЫЛКАМИ)
-        const skinsDB = [
-            { 
-                name: "AK-47 | Slate", 
-                price: 450, 
-                image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjx2jJemkV09-5lpKKqPrxN7LEmyVQ7MEpiO_E8IL0i1HihitvYm71ctfDegA6Z16GrFS2w7_vhpS06Z_MnXp9-n51YVv_v_A", 
-                color: "#8844ff" 
-            },
-            { 
-                name: "AWP | Atheris", 
-                price: 800, 
-                image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17PLfYQJD_9W7m5a0mvLwO77VqWdY781lxL_F8Yyj3Qy2_EBvMWv0LYCRJgU8YVzR_1m8wObv18S6vZ_BwXcxuCQi4i7fnkO3gAYMCLrs-jP51A", 
-                color: "#eb4b4b" 
-            },
-            { 
-                name: "Glock-18 | Fade", 
-                price: 12000, 
-                image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposbupIgthwczLZAJF7dC_mL-In-7xJ4Tdn2xZ_Ish0rDA9Nqm3wDk-0E5MW31LdKXJgQ9Z1rQ8lLskOzp0cO_vMnNmyQx63Yq4i7fnkDlgx9OaPsv26IuC_wD8w", 
-                color: "#ffd700" 
-            },
-            { 
-                name: "P250 | Sand Dune", 
-                price: 10, 
-                image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhjx2jJemkV09W_mI-FkP76J77fqWdY781lxO3C89WmjgDn_RVvazv3J4PAdg84Y13Q_wK8wbq61MDv6Z_BwXpm7yM8pSGK20yW-l8", 
-                color: "#b0c3d9" 
-            },
-            { 
-                name: "M4A4 | Neo-Noir", 
-                price: 1500, 
-                image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITCmX5d_MR6j_v--InxgUG55Rc5MTyiJYWcIQ45YQqF-ljrxezn0569vM6bzSA37yEksirYnBO0n1gSOaR__vxz", 
-                color: "#eb4b4b" 
-            },
-            { 
-                name: "USP-S | Cortex", 
-                price: 600, 
-                image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpoo6m1FBRp3_bGcjhQ09-jq5WYh8j_OrfdqWhe5sN4mTE4L356029qZ1_1IdWRdw49YQqF-Fm4xO_o0JW4vJ7Jz3Fh73Qm4ivVzEaz1B5McKUx0iWfW08e", 
-                color: "#d32ee6" 
+        // 1. ПОЛУЧАЕМ ДАННЫЕ ИЗ URL (ОТ БОТА)
+        // Бот отправит нам ссылку вида: index.html?balance=1250&user_id=123
+        const urlParams = new URLSearchParams(window.location.search);
+        const botBalance = urlParams.get('balance');
+        
+        // Если бот передал баланс, используем его. Иначе - из памяти браузера
+        if (botBalance) {
+            balance = parseInt(botBalance);
+            localStorage.setItem('rzy_balance', balance);
+        } else {
+            balance = localStorage.getItem('rzy_balance') ? parseInt(localStorage.getItem('rzy_balance')) : 0;
+        }
+
+        // 2. ОТОБРАЖАЕМ ПРОФИЛЬ ТЕЛЕГРАМ
+        const user = tg.initDataUnsafe.user;
+        if (user) {
+            document.getElementById('user-name').innerText = user.first_name;
+            document.getElementById('user-id').innerText = `ID: ${user.id}`;
+            // Если есть фото (иногда ТГ не дает ссылку, но попробуем)
+            if (user.photo_url) {
+                document.getElementById('user-avatar').style.backgroundImage = `url('${user.photo_url}')`;
             }
+        }
+
+        // БАЗА СКИНОВ
+        const skinsDB = [
+            { name: "AK-47 | Slate", price: 450, image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot7HxfDhjx2jJemkV09-5lpKKqPrxN7LEmyVQ7MEpiO_E8IL0i1HihitvYm71ctfDegA6Z16GrFS2w7_vhpS06Z_MnXp9-n51YVv_v_A", color: "#8844ff" },
+            { name: "AWP | Atheris", price: 800, image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpot621FAR17PLfYQJD_9W7m5a0mvLwO77VqWdY781lxL_F8Yyj3Qy2_EBvMWv0LYCRJgU8YVzR_1m8wObv18S6vZ_BwXcxuCQi4i7fnkO3gAYMCLrs-jP51A", color: "#eb4b4b" },
+            { name: "Glock-18 | Fade", price: 12000, image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgposbupIgthwczLZAJF7dC_mL-In-7xJ4Tdn2xZ_Ish0rDA9Nqm3wDk-0E5MW31LdKXJgQ9Z1rQ8lLskOzp0cO_vMnNmyQx63Yq4i7fnkDlgx9OaPsv26IuC_wD8w", color: "#ffd700" },
+            { name: "P250 | Sand Dune", price: 10, image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpopujwezhjx2jJemkV09W_mI-FkP76J77fqWdY781lxO3C89WmjgDn_RVvazv3J4PAdg84Y13Q_wK8wbq61MDv6Z_BwXpm7yM8pSGK20yW-l8", color: "#b0c3d9" },
+            { name: "M4A4 | Neo-Noir", price: 1500, image: "https://community.cloudflare.steamstatic.com/economy/image/-9a81dlWLwJ2UUGcVs_nsVtzdOEdtWwKGZZLQHTxDZ7I56KU0Zwwo4NUX4oFJZEHLbXH5ApeO4YmlhxYQknCRvCo04DEVlxkKgpou-6kejhz2v_Nfz5H_uO1gb-Gw_alIITCmX5d_MR6j_v--InxgUG55Rc5MTyiJYWcIQ45YQqF-ljrxezn0569vM6bzSA37yEksirYnBO0n1gSOaR__vxz", color: "#eb4b4b" }
         ];
 
         updateUI();
 
         function updateUI() {
             document.getElementById('main-balance').innerText = balance.toLocaleString() + " RZY";
+            // Внимание: мы не можем писать обратно в базу данных бота без сервера.
+            // Поэтому сохраняем прогресс пока только в браузере.
             localStorage.setItem('rzy_balance', balance);
             
             const invList = document.getElementById('inventory-list');
@@ -305,9 +267,7 @@
                     invList.innerHTML += `
                         <div class="item-card">
                             <div class="item-header">
-                                <div class="item-img-box">
-                                    <img src="${item.image}" class="skin-img">
-                                </div>
+                                <div class="item-img-box"><img src="${item.image}" class="skin-img"></div>
                                 <div class="item-info">
                                     <div class="item-name">${item.name}</div>
                                     <div class="item-status">✅ Доступен</div>
@@ -318,67 +278,42 @@
                                 <button class="btn-action btn-sell" onclick="sellItem('${item.id}')">$ Продать</button>
                                 <button class="btn-action btn-steam">🔗 В Steam</button>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             }
             localStorage.setItem('rzy_inventory', JSON.stringify(inventory));
         }
 
-        function addBalance() {
-            balance += 1000;
-            alert("Пополнено на 1000 RZY (Тест)");
-            updateUI();
-        }
-
-        // Рулетка
-        function openRoulette() {
-            document.getElementById('roulette-modal').classList.add('active');
-            generateTrack();
-        }
-
-        function closeRoulette() {
-            document.getElementById('roulette-modal').classList.remove('active');
-        }
+        function addBalance() { balance += 1000; alert("Тест: +1000 RZY"); updateUI(); }
+        function openRoulette() { document.getElementById('roulette-modal').classList.add('active'); generateTrack(); }
+        function closeRoulette() { document.getElementById('roulette-modal').classList.remove('active'); }
 
         function generateTrack() {
             const track = document.getElementById('track');
             track.innerHTML = '';
             track.style.transition = 'none';
             track.style.transform = 'translateX(0)';
-            
             for (let i = 0; i < 50; i++) {
                 const skin = skinsDB[Math.floor(Math.random() * skinsDB.length)];
                 const div = document.createElement('div');
                 div.className = 'roulette-item';
-                div.innerHTML = `
-                    <img src="${skin.image}" alt="skin">
-                    <div style="font-size:10px; color:${skin.color}; margin-top:5px;">${skin.name}</div>
-                `;
+                div.innerHTML = `<img src="${skin.image}" alt="skin"><div style="font-size:10px; color:${skin.color}; margin-top:5px;">${skin.name}</div>`;
                 track.appendChild(div);
             }
         }
 
         function spin() {
-            if (balance < 250) {
-                alert("Недостаточно средств!");
-                return;
-            }
-
+            if (balance < 250) { alert("Недостаточно средств!"); return; }
             balance -= 250;
             updateUI();
-            
             const btn = document.getElementById('spinBtn');
             const track = document.getElementById('track');
             btn.disabled = true;
-
             const winner = skinsDB[Math.floor(Math.random() * skinsDB.length)];
-            
             track.style.transition = 'transform 4s cubic-bezier(0.1, 0, 0.2, 1)';
-            const cardWidth = 141; // 140px width + 1px border
+            const cardWidth = 141;
             const stopAt = (35 * cardWidth) + (Math.random() * 50); 
             track.style.transform = `translateX(-${stopAt}px)`;
-
             setTimeout(() => {
                 alert(`Вы выиграли: ${winner.name}!`);
                 inventory.push({ ...winner, id: Date.now() });
@@ -390,11 +325,7 @@
 
         function sellItem(id) {
             const itemIndex = inventory.findIndex(i => i.id == id);
-            if (itemIndex > -1) {
-                balance += inventory[itemIndex].price;
-                inventory.splice(itemIndex, 1);
-                updateUI();
-            }
+            if (itemIndex > -1) { balance += inventory[itemIndex].price; inventory.splice(itemIndex, 1); updateUI(); }
         }
 
         const navItems = document.querySelectorAll('.nav-item');
